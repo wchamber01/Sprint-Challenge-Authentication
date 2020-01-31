@@ -1,10 +1,9 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const db = require("../database/dbConfig.js");
 
-const { jwtSecret } = require("../config/secrets.js");
-
-const Users = require("../users/users-model.js");
+const { jwtSecret } = require("./secret.js");
 
 //for endpoints beginnings with /api
 router.post("/register", (req, res) => {
@@ -12,7 +11,7 @@ router.post("/register", (req, res) => {
   const hash = bcrypt.hashSync(user.password, 3);
   user.password = hash;
 
-  Users.add(user)
+  Register(user)
     .then(newUser => {
       res.status(201).json(newUser);
     })
@@ -25,8 +24,7 @@ router.post("/register", (req, res) => {
 router.post("/login", (req, res) => {
   let { userName, password } = req.body;
   //console.log(password, "password line 27");
-  Users.findByUser(userName)
-    .first()
+  Login(userName)
     .then(user => {
       //console.log(user, "user line 31");
       if (user && bcrypt.compareSync(password, user.password)) {
@@ -47,8 +45,7 @@ router.post("/login", (req, res) => {
 function signToken(user) {
   const payload = {
     id: user.id,
-    name: user.userName,
-    department: user.department
+    name: user.username
   };
 
   const options = {
@@ -58,15 +55,24 @@ function signToken(user) {
 }
 
 /********** register **********/
-async function register(user) {
+async function Register(user) {
   const [id] = await db("users").insert(user);
 
-  return findById(id);
+  // return findById(id);
+  return db("users").where({ id });
+  // .first();
 }
 
+// function findById(id) {
+//   return db("users")
+//     .where({ id })
+//     .first();
+// }
+
 /********** login **********/
-function login(filter) {
-  return db("users").where("users.userName", filter);
-  // .select("id", "username", "department");
+function Login(filter) {
+  return db("users")
+    .where("users.username", filter)
+    .select("id", "username", "department");
 }
 module.exports = router;
