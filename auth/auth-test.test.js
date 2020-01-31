@@ -38,25 +38,33 @@ describe("server", function() {
     //make a POST request
     it("should register", function() {
       return request(server)
-        .post("/api/register")
-        .send({ userName: "bob", password: "tomato", department: "vegetable" })
+        .post("/api/auth/register")
+        .send({ username: "larry", password: "cucumber" })
         .then(res => {
-          expect(res.body.userName).toEqual("bob");
+          expect(res.body.username).toEqual("larry");
           expect(res.body.password).toBeTruthy();
-          expect(res.body.department).toEqual("vegetable");
         });
     });
-    // it("should login", async function() {
-    //   let tbl = await db("users");
-    //   expect(tbl).toHaveLength(1);
-    //   return request(server)
-    //     .post("/api/login")
-    //     .send({ userName: "bob", password: res.body.password })
-    //     .then(res => {
-    //       console.log(res.body);
-    //       expect(res.body.userName).toBe("bob");
-    //       expect(res.body.department).toBe("vegetable");
-    //     });
-    // });
+  });
+
+  describe("login functionality", () => {
+    it("should return status 200", async () => {
+      const res = await request(server)
+        .post("/api/auth/login")
+        .send({ username: "larry", password: "cucumber" });
+      expect(res.status).toBe(200);
+    });
+    it("should return a token", async () => {
+      const res = await request(server)
+        .post("/api/auth/login")
+        .send({ username: "larry", password: "cucumber" });
+      expect(res.body.token).toBeTruthy();
+    });
+    it("should return json", async () => {
+      const res = await request(server)
+        .post("/api/auth/login")
+        .send({ username: "larry", password: "cucumber" });
+      expect(res.type).toBe("application/json");
+    });
   });
 });
