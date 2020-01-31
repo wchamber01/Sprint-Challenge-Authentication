@@ -19,7 +19,7 @@ function findBy(filter) {
 }
 
 function findByUser(filter) {
-  return db("users").where("users.userName", filter);
+  return db("users").where("users.username", filter);
   // .select("id", "username", "department");
 }
 
